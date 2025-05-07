@@ -1,39 +1,30 @@
-import sys
+n = int(input())
+nlist = list(map(int, input().split()))
 
-# 입력
-n = int(input())                           # 수의 개수 N
-nums = list(map(int, input().split()))     # 수열 A1 ~ AN
-plus, minus, mul, div = map(int, input().split())  # 연산자 개수
-
-# 결과 초기값 (제한 조건 고려하여 설정)
-max_val = -1_000_000_000
-min_val = 1_000_000_000
-
-def dfs(idx, current, p, m, mul_, d):
-    global max_val, min_val
+p, m, multi, divi = map(int, input().split())
+max_man = -1_000_000_000
+min_man = 1_000_000_000
+def back(idx, current, plus, minus, multii, divii):
+    global max_man, min_man
     if idx == n:
-        # 마지막 수까지 계산했을 때
-        max_val = max(max_val, current)
-        min_val = min(min_val, current)
+        max_man = max(max_man, current)
+        min_man = min(min_man, current)
         return
 
-    # 각각의 연산자가 남아 있다면 해당 연산으로 다음 수와 계산
-    if p > 0:
-        dfs(idx + 1, current + nums[idx], p - 1, m, mul_, d)
-    if m > 0:
-        dfs(idx + 1, current - nums[idx], p, m - 1, mul_, d)
-    if mul_ > 0:
-        dfs(idx + 1, current * nums[idx], p, m, mul_ - 1, d)
-    if d > 0:
+    if plus > 0:
+        back(idx+1, current+nlist[idx], plus-1, minus, multii, divii)
+    if minus > 0:
+        back(idx+1, current-nlist[idx], plus, minus-1, multii, divii)
+    if multii > 0:
+        back(idx+1, current*nlist[idx], plus, minus, multii-1, divii)
+    if divii > 0:
         if current < 0:
-            # 음수 나눗셈 C++14 방식: 음수 → 양수 → 몫 → 다시 음수
-            dfs(idx + 1, -(-current // nums[idx]), p, m, mul_, d - 1)
+            back(idx+1, -(abs(current) // nlist[idx]), plus, minus, multii, divii-1)
         else:
-            dfs(idx + 1, current // nums[idx], p, m, mul_, d - 1)
+            back(idx+1, current // nlist[idx], plus, minus, multii, divii-1)
 
-# 처음 수부터 시작, index = 1부터 연산 시작
-dfs(1, nums[0], plus, minus, mul, div)
 
-# 결과 출력
-print(max_val)
-print(min_val)
+back(1, nlist[0], p, m, multi, divi)
+
+print(max_man)
+print(min_man)
