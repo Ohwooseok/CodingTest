@@ -1,57 +1,65 @@
 import sys
+import io
+import math
+from collections import defaultdict
 from collections import deque
+from collections import Counter
 from itertools import combinations
 import copy
-import io
-
-N, M = map(int, sys.stdin.readline().split())
-
-what = []
-for i in range(N):
-    what.append(list(map(int, sys.stdin.readline().split())))
 
 
-empty_space = []
-for i in range(N):
-    for j in range(M):
-        if what[i][j] == 0:
-            empty_space.append((i,j))
+
+n, m = map(int, input().split())
+
+lab = []
+
+for _ in range(n):
+    lab.append(list(map(int, input().split())))
+
+safe_place = []
+
+for i in range(n):
+    for j in range(m):
+        if lab[i][j] == 0:
+            safe_place.append((i,j))
+
+def spread_virus(x,y,labb):
+
+    direction = [(1,0), (-1,0), (0,-1), (0,1)]
+    q = deque([])
+    q.append((x,y))
+
+    while q:
+        ax, ay = q.popleft()
+
+        for dx, dy in direction:
+            nx, ny = ax + dx, ay + dy
+
+            if 0 <= nx < n and 0 <= ny < m:
+                if labb[nx][ny] == 0:
+                    q.append((nx,ny))
+                    labb[nx][ny] = 2
+
+max_count = []
+for wall in combinations(safe_place, 3):
+    count = 0
+    copy_lab = copy.deepcopy(lab)
+
+    for w in wall:
+        copy_lab[w[0]][w[1]] = 1
 
 
-def spread_virus(x,y,lab):
-    queue = deque([(x,y)])
-    directions = [(1,0), (-1,0), (0,1), (0,-1)]
-    while queue:
-        x, y = queue.popleft()
-
-        for ax, ay in directions:
-            dx, dy = x + ax, y + ay
-
-            if 0 <= dx < N and 0 <= dy < M:
-                if lab[dx][dy] == 0:
-                    lab[dx][dy] = 2
-                    queue.append((dx,dy))
-
-max_what = []
-
-for walls in combinations(empty_space, 3):
-    count = 0 # 안전 영역 개수
-    fake_what = copy.deepcopy(what)
-    for w in walls:
-        fake_what[w[0]][w[1]] = 1
+    for i in range(n):
+        for j in range(m):
+            if copy_lab[i][j] == 2:
+                spread_virus(i,j,copy_lab)
 
 
-    for i in range(N):
-        for j in range(M):
-            if fake_what[i][j] == 2:
-                spread_virus(i,j, fake_what)
-
-
-    for i in range(N):
-        for j in range(M):
-            if fake_what[i][j] == 0:
+    for i in range(n):
+        for j in range(m):
+            if copy_lab[i][j] == 0:
                 count += 1
 
-    max_what.append(count)
+    max_count.append(count)
 
-print(max(max_what))
+print(max(max_count))
